@@ -15,11 +15,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import javax.swing.JOptionPane;
 
-/**
- *
- * @author PV
- */
 public class JFrameClient extends javax.swing.JFrame implements Runnable {
 
     Thread thread;
@@ -55,6 +52,8 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
         btnSend = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         inputText = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        nameInput = new javax.swing.JTextField();
 
         jLabel1.setText("jLabel1");
 
@@ -82,14 +81,28 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
             }
         });
 
+        jLabel4.setText("You name:");
+
+        nameInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nameInputActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(22, 22, 22)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nameInput, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel2))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
@@ -97,17 +110,18 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
                                 .addComponent(inputText, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(145, 145, 145)
-                        .addComponent(jLabel2)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(16, 16, 16)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(nameInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -124,12 +138,28 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
     private void btnSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSendActionPerformed
         // TODO add your handling code here:
 //        roomchat.append(inputText.getText().toString().trim() + "\n");
+        String name = nameInput.getText();
+        if (name.equalsIgnoreCase("")) {
+            JOptionPane.showMessageDialog(null, "Please enter your name!");
+            return;
+        }
         try {
             msg = inputText.getText().toString().trim();
             clientOut = client.getOutputStream();
             pw = new PrintWriter(clientOut, true);
-            pw.println(msg);
+            String msSend = String.format("%s: %s", name, msg);
+            pw.println(msSend);
+            roomchat.append(msSend + "\n");
             inputText.setText("");
+
+            if (msg.equalsIgnoreCase("bye")) {
+                pw.close();
+                client.close();
+                System.out.println("Closed!");
+                setDefaultCloseOperation(JFrameClient.EXIT_ON_CLOSE);
+                dispose();
+            }
+
         } catch (Exception e) {
         }
     }//GEN-LAST:event_btnSendActionPerformed
@@ -137,6 +167,10 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
     private void inputTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputTextActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_inputTextActionPerformed
+
+    private void nameInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameInputActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_nameInputActionPerformed
 
     public javax.swing.JTextArea getRoom() {
         return this.roomchat;
@@ -146,11 +180,6 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -185,7 +214,6 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
                 System.out.println(InetAddress.getLocalHost());
                 client = new Socket(InetAddress.getByName("localhost"), portnumber);
                 connectionSuccess = true;
-                System.out.println("true");
 
                 JFrameClient recieveMsgThread = new JFrameClient(client);
                 recieveMsgThread.setVisible(true);
@@ -196,7 +224,6 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
                 while (!client.isClosed()) {
                     // Read data from the input stream of the client socket.
                     recieveMsgThread.getRoom().append(br.readLine() + "\n");
-//                    System.out.println(br.readLine());
                 }
 
                 br.close();
@@ -218,37 +245,14 @@ public class JFrameClient extends javax.swing.JFrame implements Runnable {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField nameInput;
     private javax.swing.JTextArea roomchat;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void run() {
         System.out.println("Client socket is created " + client);
-        
-        try {
-            // Create an output stream of the client socket (write socket output to server)
-//            clientOut = client.getOutputStream();
-//            pw = new PrintWriter(clientOut, true);
-
-            // Create an input stream of the client socket (read socket input)
-            InputStream clientIn = client.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(clientIn));
-            BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-
-            System.out.println("Enter your Message. Type Bye to exit. ");
-            while (true) {
-                if (msg.equalsIgnoreCase("bye")) {
-                    setDefaultCloseOperation(JFrameClient.EXIT_ON_CLOSE);
-                    break;
-                }
-            }
-            pw.close();
-            br.close();
-            client.close();
-            System.out.println("Closed!");
-        } catch (IOException ie) {
-            System.out.println("I/O error " + ie);
-        }
     }
 }

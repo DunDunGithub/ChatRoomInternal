@@ -37,7 +37,6 @@ public class Server {
                 // Read data from the client
                 InputStream clientIn = client.getInputStream();
                 BufferedReader br = new BufferedReader(new InputStreamReader(clientIn));
-
                 ServerSocketThread mt1 = new ServerSocketThread(client);
 
             } catch (IOException ie) {
@@ -79,21 +78,25 @@ class ServerSocketThread implements Runnable {
                 System.out.println(String.format("Message received from %s:%d = %s", clientHost, clientPort, msgFromClient));
 
                 // Send response to the client
-                if (msgFromClient != null && !msgFromClient.equalsIgnoreCase("bye")) {
+                
+                String[] arrOfMsg = msgFromClient.split(" ", 2);
+                
+                if (arrOfMsg.length > 1 && !arrOfMsg[1].equalsIgnoreCase("bye")) {
                     for (Socket anotherClient : Server.clients) {
                         if (client != anotherClient) {
                             OutputStream clientOut = anotherClient.getOutputStream();
                             PrintWriter pw = new PrintWriter(clientOut, true);
-                            String ansMsg = String.format("Message from %s:%d = %s", clientHost, clientPort, msgFromClient);
+                            String ansMsg = msgFromClient;
                             pw.println(ansMsg);
                         }
                     }
                 }
 
                 // Close sockets
-                if (msgFromClient != null && msgFromClient.equalsIgnoreCase("bye")) {
-                    client.close();
+                if (arrOfMsg.length > 1 && arrOfMsg[1].equalsIgnoreCase("bye")) {
+                    System.out.println(String.format("client %s:%s closed!", clientHost, clientPort));
                     bttl10_20127473_20127582.Server.clients.remove(client);
+                    client.close();
                     break;
                 }
             }
